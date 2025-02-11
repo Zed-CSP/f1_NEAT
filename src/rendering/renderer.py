@@ -23,7 +23,7 @@ class Renderer:
     def increment_generation(self):
         self.current_generation += 1
 
-    def render_frame(self, cars, still_alive, checkpoints, show_radars=True):
+    def render_frame(self, cars, still_alive, checkpoints, show_radars=True, time_scale=1.0):
         # Clear screen with black
         self.screen.fill((0, 0, 0))
         
@@ -52,6 +52,12 @@ class Renderer:
         text = self.alive_font.render(f"ALIVE: {still_alive}", True, (0, 0, 0))
         text_rect = text.get_rect()
         text_rect.center = (1500, 400)
+        self.screen.blit(text, text_rect)
+        
+        # Add time scale display
+        text = self.alive_font.render(f"SPEED: {time_scale:.2f}x", True, (0, 0, 0))
+        text_rect = text.get_rect()
+        text_rect.center = (1500, 430)  # Position it 30 pixels below the ALIVE counter
         self.screen.blit(text, text_rect)
         
         pygame.display.flip() 

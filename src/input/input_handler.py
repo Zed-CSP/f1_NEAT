@@ -1,5 +1,7 @@
 import pygame
 import sys
+from constants.game_constants import MIN_TIME_SCALE, MAX_TIME_SCALE, TIME_SCALE_INCREMENT
+from state.simulation_state import simulation_state
 
 class InputHandler:
     def __init__(self):
@@ -18,6 +20,13 @@ class InputHandler:
             sys.exit(0)
         elif event.key == pygame.K_r:
             self.show_radars = not self.show_radars
+        elif event.key == pygame.K_UP:
+            simulation_state.time_scale = min(simulation_state.time_scale + TIME_SCALE_INCREMENT, MAX_TIME_SCALE)
+        elif event.key == pygame.K_DOWN:
+            simulation_state.time_scale = max(simulation_state.time_scale - TIME_SCALE_INCREMENT, MIN_TIME_SCALE)
     
     def should_show_radars(self):
         return self.show_radars 
+    
+    def get_time_scale(self):
+        return simulation_state.time_scale 

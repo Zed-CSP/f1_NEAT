@@ -6,11 +6,9 @@ import math
 from objects.car import Car
 from constants.game_constants import *
 from input.input_handler import InputHandler
+from state.simulation_state import simulation_state
 
 def run_simulation(genomes, config, renderer):
-    # Add time scale at the top of run_simulation (1.0 is normal speed, lower = slower)
-    TIME_SCALE = 3  # This will run at 25% speed
-    
     # Empty Collections For Nets and Cars
     nets = []
     cars = []
@@ -49,7 +47,7 @@ def run_simulation(genomes, config, renderer):
                     pygame.quit()
                     sys.exit(0)
 
-        # For Each Car Get The Acton It Takes
+        # For Each Car Get The Action It Takes
         still_alive = 0
         for i, car in enumerate(cars):
             if car.is_alive():
@@ -57,16 +55,16 @@ def run_simulation(genomes, config, renderer):
                 output = nets[i].activate(car.get_data())
                 choice = output.index(max(output))
                 
-                # Car controls
+                # Car controls with dynamic time scale
                 if choice == 0:
-                    car.angle += 10 * TIME_SCALE
+                    car.angle += 10 * simulation_state.time_scale
                 elif choice == 1:
-                    car.angle -= 10 * TIME_SCALE
+                    car.angle -= 10 * simulation_state.time_scale
                 elif choice == 2:
                     if(car.speed - 2 >= 12):
-                        car.speed -= 2 * TIME_SCALE
+                        car.speed -= 2 * simulation_state.time_scale
                 else:
-                    car.speed += 2 * TIME_SCALE
+                    car.speed += 2 * simulation_state.time_scale
                 
                 # Check for checkpoint collisions and update rewards
                 for cp_index, checkpoint in enumerate(checkpoints):
@@ -90,9 +88,10 @@ def run_simulation(genomes, config, renderer):
                 genomes[i][1].fitness += car.get_reward()
 
         # Render the current frame
-        renderer.render_frame(cars, still_alive, checkpoints, input_handler.should_show_radars())
+        renderer.render_frame(cars, still_alive, checkpoints, 
+                            input_handler.should_show_radars(),
+                            simulation_state.time_scale)
         
-        # Break conditions
         if still_alive == 0:
             break
 
@@ -100,4 +99,4 @@ def run_simulation(genomes, config, renderer):
         if counter == SIMULATION_TIMEOUT:
             break
 
-        clock.tick(60 * TIME_SCALE)
+        clock.tick(60 * simulation_state.time_scale)
