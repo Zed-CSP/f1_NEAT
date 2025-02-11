@@ -8,7 +8,7 @@ class Renderer:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
         
         # Load and convert map once
-        self.game_map = pygame.image.load('./assets/vegas.png').convert()
+        self.game_map = pygame.image.load('./assets/images/vegas.png').convert()
         
         # Load custom font
         try:
