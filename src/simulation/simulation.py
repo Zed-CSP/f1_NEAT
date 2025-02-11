@@ -5,6 +5,7 @@ import math
 
 from objects.car import Car
 from constants.game_constants import *
+from input.input_handler import InputHandler
 
 def run_simulation(genomes, config, renderer):
     # Add time scale at the top of run_simulation (1.0 is normal speed, lower = slower)
@@ -34,7 +35,11 @@ def run_simulation(genomes, config, renderer):
         # Add more checkpoints following your track
     ]
 
+    input_handler = InputHandler()
+
     while True:
+        input_handler.handle_events()
+        
         # Exit On Quit Event Or ESC Key
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -85,7 +90,7 @@ def run_simulation(genomes, config, renderer):
                 genomes[i][1].fitness += car.get_reward()
 
         # Render the current frame
-        renderer.render_frame(cars, still_alive, checkpoints)
+        renderer.render_frame(cars, still_alive, checkpoints, input_handler.should_show_radars())
         
         # Break conditions
         if still_alive == 0:

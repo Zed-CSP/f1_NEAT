@@ -10,15 +10,20 @@ class Renderer:
         # Load and convert map once
         self.game_map = pygame.image.load('./assets/vegas.png').convert()
         
-        # Initialize fonts
-        self.generation_font = pygame.font.SysFont("Arial", 30)
-        self.alive_font = pygame.font.SysFont("Arial", 20)
+        # Load custom font
+        try:
+            self.generation_font = pygame.font.Font('./assets/fonts/Alphacorsa.ttf', 50)  # Adjust path as needed
+        except:
+            print("Could not load custom font. Falling back to Arial")
+            self.generation_font = pygame.font.SysFont("Arial", 50)
+        
+        self.alive_font = pygame.font.SysFont("./assets/fonts/Alphacorsa.ttf", 20)
         self.current_generation = 0  # Add generation counter here
 
     def increment_generation(self):
         self.current_generation += 1
 
-    def render_frame(self, cars, still_alive, checkpoints):
+    def render_frame(self, cars, still_alive, checkpoints, show_radars=True):
         # Clear screen with black
         self.screen.fill((0, 0, 0))
         
@@ -28,7 +33,7 @@ class Renderer:
         # Draw all cars
         for car in cars:
             if car.is_alive():
-                car.draw(self.screen)
+                car.draw(self.screen, show_radars)
         
         # Draw checkpoints and numbers
         for i, checkpoint in enumerate(checkpoints):
@@ -39,14 +44,14 @@ class Renderer:
             self.screen.blit(text, text_rect)
         
         # Draw stats
-        text = self.generation_font.render(f"Generation: {self.current_generation}", True, (0, 0, 0))
+        text = self.generation_font.render(f"GENERATION: {self.current_generation}", True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (900, 450)
+        text_rect.center = (1050, 110)
         self.screen.blit(text, text_rect)
         
-        text = self.alive_font.render(f"Still Alive: {still_alive}", True, (0, 0, 0))
+        text = self.alive_font.render(f"ALIVE: {still_alive}", True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (900, 490)
+        text_rect.center = (1500, 400)
         self.screen.blit(text, text_rect)
         
         pygame.display.flip() 

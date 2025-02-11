@@ -37,9 +37,10 @@ class Car:
         self.max_steering_angle = 30  # Maximum steering angle in degrees
         self.angular_velocity = 0  # Current turning rate
 
-    def draw(self, screen):
-        screen.blit(self.rotated_sprite, self.position) # Draw Sprite
-        self.draw_radar(screen) #OPTIONAL FOR SENSORS
+    def draw(self, screen, show_radars=True):
+        screen.blit(self.rotated_sprite, self.position)
+        if show_radars:
+            self.draw_radar(screen)
 
     def draw_radar(self, screen):
         # Optionally Draw All Sensors / Radars
