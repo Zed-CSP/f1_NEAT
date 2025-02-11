@@ -1,3 +1,6 @@
+# WIP!
+
+
 # F1 NEAT Simulation
 
 This project simulates a car racing environment using the NEAT (NeuroEvolution of Augmenting Topologies) algorithm to evolve neural networks that control the cars.
