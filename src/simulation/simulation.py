@@ -55,16 +55,16 @@ def run_simulation(genomes, config, renderer):
                 output = nets[i].activate(car.get_data())
                 choice = output.index(max(output))
                 
-                # Car controls with dynamic time scale
+                # Car controls - removed time scale from physics
                 if choice == 0:
-                    car.angle += 10 * simulation_state.time_scale
+                    car.angle += 10
                 elif choice == 1:
-                    car.angle -= 10 * simulation_state.time_scale
+                    car.angle -= 10
                 elif choice == 2:
                     if(car.speed - 2 >= 12):
-                        car.speed -= 2 * simulation_state.time_scale
+                        car.speed -= 2
                 else:
-                    car.speed += 2 * simulation_state.time_scale
+                    car.speed += 2
                 
                 # Check for checkpoint collisions and update rewards
                 for cp_index, checkpoint in enumerate(checkpoints):
@@ -99,4 +99,5 @@ def run_simulation(genomes, config, renderer):
         if counter == SIMULATION_TIMEOUT:
             break
 
+        # Only use time_scale for the frame rate, not the physics
         clock.tick(60 * simulation_state.time_scale)

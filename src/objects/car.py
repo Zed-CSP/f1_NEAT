@@ -86,7 +86,7 @@ class Car:
     def update(self, game_map):
         # Set The Speed To 20 For The First Time
         if not self.speed_set:
-            self.speed = 20
+            self.speed = 10
             self.speed_set = True
 
         # Calculate steering dynamics
