@@ -30,8 +30,9 @@ This project simulates a car racing environment using the NEAT (NeuroEvolution o
    ```
 
 2. **Run the Simulation**:
+  (WIP: For the time being be sure to run from inside src)
    ```bash
-   python src/main.py
+   python main.py
    ```
 
 ## Configuration
