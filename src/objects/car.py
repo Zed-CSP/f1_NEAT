@@ -164,3 +164,12 @@ class Car:
         rotated_rectangle.center = rotated_image.get_rect().center
         rotated_image = rotated_image.subsurface(rotated_rectangle).copy()
         return rotated_image
+
+    def save_radar_state(self):
+        """Save the current radar state."""
+        self.saved_radars = self.radars.copy()
+
+    def restore_radar_state(self):
+        """Restore the saved radar state."""
+        if hasattr(self, 'saved_radars'):
+            self.radars = self.saved_radars.copy()

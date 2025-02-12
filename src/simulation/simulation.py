@@ -101,3 +101,11 @@ def run_simulation(genomes, config, renderer):
 
         # Only use time_scale for the frame rate, not the physics
         clock.tick(60 * simulation_state.time_scale)
+
+        # At the end of the generation, save the radar state
+        for car in cars:
+            car.save_radar_state()
+
+        # At the beginning of the next generation, restore the radar state
+        for car in cars:
+            car.restore_radar_state()
