@@ -19,6 +19,19 @@ This project simulates a car racing environment using the NEAT (NeuroEvolution o
 
 This makes NEAT particularly powerful for solving tasks where the optimal neural network architecture is unknown or highly complex.
 
+### Findings  
+
+Due to the nature of this learning style, unexpected behaviors often emerge. Here are some key observations from the simulation:  
+
+- **Circling Behavior:**  
+  Initially, many cars were driving in circles at their first opportunity. This occurred because the reward system only incentivized distance traveled, allowing them to exploit the system without progressing.  
+  - **Solution:** I implemented a series of checkpoints to encourage more purposeful movement and proper driving behavior.  
+
+- **Swerving Movement:**  
+  Another surprising behavior was that the cars learned to drive in a swerving manner, sweeping their 12 o'clock radar in a way similar to how an insect uses its antennae.  
+  - **Analysis:** This behavior likely helps the model gather more accurate feedback from its environment, showing that the network is actively seeking more input.  
+  - **Next Steps:** To address this, I plan to modify the 12 o'clock radar to a 20-degree "line of sight" (-10 to +10 degrees), aligning the sensor's design with the behavior the cars are naturally adopting.  
+
 ## Project Structure
 
 - **src/**: Contains the source code.
