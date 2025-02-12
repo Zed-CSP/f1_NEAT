@@ -9,7 +9,7 @@ This project simulates a car racing environment using the NEAT (NeuroEvolution o
 
 ![Simulation Screenshot](./src/assets/images/Screenshot.png)
 
-### What is NEAT?
+## What is NEAT?
 
 **NEAT (NeuroEvolution of Augmenting Topologies)** is a type of evolutionary algorithm used to generate artificial neural networks. Unlike traditional neural networks that have a fixed structure, NEAT evolves both the neural network's weights and its architecture over generations. This approach allows it to optimize complex tasks by:
 
@@ -19,7 +19,7 @@ This project simulates a car racing environment using the NEAT (NeuroEvolution o
 
 This makes NEAT particularly powerful for solving tasks where the optimal neural network architecture is unknown or highly complex.
 
-### Findings  
+## Findings  
 
 Due to the nature of this learning style, unexpected behaviors often emerge. Here are some key observations from the simulation:  
 
