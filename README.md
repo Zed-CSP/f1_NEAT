@@ -7,7 +7,7 @@ This project simulates a car racing environment using the NEAT (NeuroEvolution o
 
 ## Screenshot
 
-![Simulation Screenshot](./src/assets/images/screenshot.png)
+![Simulation Screenshot](./src/assets/images/Screenshot.png)
 
 ## Project Structure
 
