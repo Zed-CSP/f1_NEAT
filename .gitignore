@@ -69,3 +69,4 @@ venv.bak/
 # Temporary files
 *.tmp
 *.temp
+network_visualization/

@@ -32,8 +32,11 @@ SIMULATION_TIMEOUT = 30 * 40  # 20 seconds worth of frames
 CHECKPOINT_REWARD = 2000
 WRONG_CHECKPOINT_PENALTY = -4000
 TIME_PENALTY_FACTOR = -0.1
+COMPLETION_TIME_REWARD = 10000  # Base reward for completing the track
+TIME_REWARD_FACTOR = 100  # Reward multiplier for faster completion times
+FINISH_POSITION_DECREMENT = 0.8  # Each position gets 80% of the previous position's reward
 
 # Time Scale Settings
 MIN_TIME_SCALE = 0.25
-MAX_TIME_SCALE = 5.0
+MAX_TIME_SCALE = 10.0
 TIME_SCALE_INCREMENT = 0.25 

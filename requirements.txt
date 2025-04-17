@@ -1,3 +1,5 @@
 pygame
 neat-python
-numpy 
+numpy
+graphviz
+matplotlib 

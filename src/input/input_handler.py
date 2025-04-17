@@ -20,6 +20,8 @@ class InputHandler:
             sys.exit(0)
         elif event.key == pygame.K_r:
             simulation_state.show_radars = not simulation_state.show_radars
+        elif event.key == pygame.K_n:
+            simulation_state.show_network_vis = not simulation_state.show_network_vis
         elif event.key == pygame.K_UP:
             simulation_state.time_scale = min(simulation_state.time_scale + TIME_SCALE_INCREMENT, MAX_TIME_SCALE)
         elif event.key == pygame.K_DOWN:
@@ -27,6 +29,9 @@ class InputHandler:
     
     def should_show_radars(self):
         return simulation_state.show_radars
+    
+    def should_show_network_vis(self):
+        return simulation_state.show_network_vis
     
     def get_time_scale(self):
         return simulation_state.time_scale 

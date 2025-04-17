@@ -3,12 +3,36 @@ import pygame
 from constants.game_constants import * 
 
 class Car:
-
-    def __init__(self):
-        # Load Car Sprite and Rotate
-        self.sprite = pygame.image.load('./assets/images/car.png').convert() # Convert Speeds Up A Lot
+    TEAMS = ['aston', 'ferrari', 'mclaren', 'mercedes', 'redbull']
+    DRIVERS = {
+        'aston': ['Alonso', 'Stroll'],
+        'ferrari': ['Leclerc', 'Sainz'],
+        'mclaren': ['Norris', 'Piastri'],
+        'mercedes': ['Hamilton', 'Russell'],
+        'redbull': ['Verstappen', 'Tsunoda']
+    }
+    
+    def __init__(self, team_index=0, driver_index=0):
+        # Load Car Sprite and Rotate based on team
+        team_name = self.TEAMS[team_index]
+        self.team_index = team_index
+        self.driver_index = driver_index
+        self.team_name = team_name
+        self.driver_name = self.DRIVERS[team_name][driver_index]
+        
+        # Load car image
+        self.sprite = pygame.image.load(f'./assets/images/cars/{team_name}.png').convert()
         self.sprite = pygame.transform.scale(self.sprite, (CAR_SIZE_X, CAR_SIZE_Y))
         self.rotated_sprite = self.sprite 
+        
+        # Load driver image
+        try:
+            self.driver_image = pygame.image.load(f'./assets/images/drivers/{team_name}/{self.driver_name}.png').convert_alpha()
+            # Scale driver image to a reasonable size for display
+            self.driver_image = pygame.transform.scale(self.driver_image, (100, 100))
+        except:
+            print(f"Could not load driver image for {self.driver_name}")
+            self.driver_image = None
 
         # Update starting position to match vegas track
         self.position = [1630, 140]  # New Starting Position
@@ -31,6 +55,8 @@ class Car:
         self.current_checkpoint = 0
         self.checkpoint_bonus = 0
         self.wrong_checkpoint_penalty = 0  # Add penalty counter
+        self.completion_time = None  # Track when the car completes the track
+        self.finish_position = None  # Track the car's finishing position
 
         self.wheelbase = 20  # Distance between front and rear axle
         self.steering_angle = 0  # Current steering angle
@@ -148,13 +174,30 @@ class Car:
         return self.alive
 
     def get_reward(self):
-        # New reward function with wrong checkpoint penalty
-        checkpoint_reward = self.checkpoint_bonus * 2000  # Bonus for correct checkpoints
-        wrong_checkpoint_penalty = self.wrong_checkpoint_penalty * -4000  # Penalty for wrong checkpoints
+        # Base rewards and penalties
+        checkpoint_reward = self.checkpoint_bonus * CHECKPOINT_REWARD
+        wrong_checkpoint_penalty = self.wrong_checkpoint_penalty * WRONG_CHECKPOINT_PENALTY
         distance_reward = self.distance / (CAR_SIZE_X / 2)
-        time_penalty = -0.1 * self.time
+        time_penalty = TIME_PENALTY_FACTOR * self.time
         
-        return checkpoint_reward + wrong_checkpoint_penalty + distance_reward + time_penalty
+        # Calculate completion time reward if the car has completed the track
+        completion_reward = 0
+        if self.completion_time is not None:
+            # Base completion reward
+            completion_reward = COMPLETION_TIME_REWARD
+            
+            # Additional reward for faster completion
+            # The faster the completion time, the higher the reward
+            time_bonus = TIME_REWARD_FACTOR * (SIMULATION_TIMEOUT - self.completion_time)
+            completion_reward += max(0, time_bonus)
+            
+            # Apply finishing position multiplier
+            # First place gets full reward, each position after gets a percentage of the previous
+            if self.finish_position is not None:
+                position_multiplier = FINISH_POSITION_DECREMENT ** (self.finish_position - 1)
+                completion_reward *= position_multiplier
+        
+        return checkpoint_reward + wrong_checkpoint_penalty + distance_reward + time_penalty + completion_reward
 
     def rotate_center(self, image, angle):
         # Rotate The Rectangle
