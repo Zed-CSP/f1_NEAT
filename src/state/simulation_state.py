@@ -1,3 +1,5 @@
+from objects.car import Car
+
 class SimulationState:
     _instance = None
     
@@ -9,6 +11,7 @@ class SimulationState:
             cls._instance.show_network_vis = False  # Add network visualization state
             cls._instance.top_performers = []  # Track top performers from last generation
             cls._instance.team_driver_assignments = {}  # Track which drivers are assigned to which teams
+            cls._instance.genome_team_assignments = {}  # Track which genome belongs to which team
         return cls._instance
     
     @property
@@ -51,6 +54,14 @@ class SimulationState:
     def team_driver_assignments(self, value):
         self._team_driver_assignments = value
         
+    @property
+    def genome_team_assignments(self):
+        return self._genome_team_assignments
+        
+    @genome_team_assignments.setter
+    def genome_team_assignments(self, value):
+        self._genome_team_assignments = value
+        
     def update_top_performers(self, genomes, cars):
         """Update the list of top performers from the current generation"""
         # Sort genomes by fitness
@@ -71,11 +82,48 @@ class SimulationState:
                 })
                 
                 # Update team driver assignments based on top performers
+                # This ensures that winning drivers maintain their assignments
                 team_name = car.team_name
                 driver_index = car.driver_index
-                self.team_driver_assignments[team_name] = driver_index
+                
+                # Only update if this is a top performer
+                if i < 3:  # Only the top 3 performers influence future driver assignments
+                    # Check if this team already has a driver assignment
+                    if team_name in self.team_driver_assignments:
+                        # Only update if the driver is different
+                        if self.team_driver_assignments[team_name] != driver_index:
+                            print(f"Updated driver assignment for {team_name}: {car.driver_name}")
+                            self.team_driver_assignments[team_name] = driver_index
+                    else:
+                        # First time seeing this team
+                        print(f"Initial driver assignment for {team_name}: {car.driver_name}")
+                        self.team_driver_assignments[team_name] = driver_index
+                
+                # Preserve team assignment for top performers
+                self.genome_team_assignments[genome_id] = car.team_name
+                print(f"Preserved team assignment for genome {genome_id}: {car.team_name}")
         
         self.top_performers = top_performers
+        
+        # Print current driver assignments for debugging
+        print("Current driver assignments:")
+        for team, driver_index in self.team_driver_assignments.items():
+            driver_name = Car.DRIVERS[team][driver_index]
+            print(f"  {team}: {driver_name}")
+            
+        # Print current team assignments for debugging
+        print("Current team assignments:")
+        for genome_id, team_name in self.genome_team_assignments.items():
+            print(f"  Genome {genome_id}: {team_name}")
+            
+    def get_team_assignment(self, genome_id):
+        """Get the team assignment for a genome, or None if not assigned"""
+        return self.genome_team_assignments.get(genome_id)
+        
+    def assign_team(self, genome_id, team_name):
+        """Assign a genome to a team"""
+        self.genome_team_assignments[genome_id] = team_name
+        print(f"Assigned genome {genome_id} to team {team_name}")
 
 # Create a global instance
 simulation_state = SimulationState() 

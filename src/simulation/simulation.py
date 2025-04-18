@@ -13,25 +13,62 @@ def run_simulation(genomes, config, renderer):
     nets = []
     cars = []
     
-    # Track which drivers are assigned to which teams in this generation
-    current_team_driver_assignments = {}
+    # Create a dictionary to track how many cars each team has in this generation
+    team_counts = {team: 0 for team in Car.TEAMS}
     
-    # Create cars for each genome
-    for i, g in genomes:
+    # First pass: Create neural networks and assign teams
+    for i, (genome_id, g) in enumerate(genomes):
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
         g.fitness = 0
         
-        # Determine team index
-        team_index = (i % len(Car.TEAMS))
-        team_name = Car.TEAMS[team_index]
+        # Check if this genome already has a team assignment (from top performers)
+        team_name = simulation_state.get_team_assignment(genome_id)
         
-        # Check if this team already has a car in this generation
-        if team_name in current_team_driver_assignments:
-            # This team already has a car, assign the other driver
-            driver_index = 1 if current_team_driver_assignments[team_name] == 0 else 0
-        else:
-            # First car for this team
+        if team_name is None:
+            # This genome doesn't have a preserved team assignment
+            # Assign it to a team based on current distribution
+            # Find the team with the fewest cars
+            min_count = min(team_counts.values())
+            available_teams = [team for team, count in team_counts.items() if count == min_count]
+            
+            # If all teams have the same number of cars, prefer teams that haven't been assigned yet
+            if len(available_teams) > 1:
+                unassigned_teams = [team for team in available_teams if team not in simulation_state.genome_team_assignments.values()]
+                if unassigned_teams:
+                    available_teams = unassigned_teams
+            
+            # Assign to a random team from the available teams
+            team_name = available_teams[i % len(available_teams)]
+            simulation_state.assign_team(genome_id, team_name)
+        
+        # Only increment count if we haven't exceeded 2 cars per team
+        if team_counts[team_name] < 2:
+            team_counts[team_name] += 1
+    
+    # Print team distribution for debugging
+    print("Team distribution in this generation:")
+    for team, count in team_counts.items():
+        print(f"  {team}: {count} cars")
+    
+    # Create a list of (genome_id, team_name) pairs for cars we want to create
+    car_assignments = []
+    for i, (genome_id, g) in enumerate(genomes):
+        team_name = simulation_state.get_team_assignment(genome_id)
+        if team_counts[team_name] > 0:
+            car_assignments.append((genome_id, team_name))
+            team_counts[team_name] -= 1
+    
+    # Second pass: Create cars with proper driver assignments
+    for i, (genome_id, team_name) in enumerate(car_assignments):
+        team_index = Car.TEAMS.index(team_name)
+        
+        # Determine which car this is for the team (first or second)
+        is_first_car = team_counts[team_name] == 1
+        
+        # Assign driver based on whether this is the first or second car for the team
+        if is_first_car:
+            # This is the first car for this team
             # Check if we have a persistent assignment from previous generations
             if team_name in simulation_state.team_driver_assignments:
                 # Use the other driver than what was assigned in previous generations
@@ -40,11 +77,30 @@ def run_simulation(genomes, config, renderer):
             else:
                 # No previous assignment, use first driver
                 driver_index = 0
+        else:
+            # This is the second car for this team
+            # Use the opposite driver of the first car
+            # We need to find the first car for this team
+            first_car_index = next((j for j, (g_id, t_name) in enumerate(car_assignments) 
+                                   if j < i and t_name == team_name), None)
             
-            current_team_driver_assignments[team_name] = driver_index
+            if first_car_index is not None:
+                # Get the driver of the first car
+                first_car = cars[first_car_index]
+                # Assign the opposite driver
+                driver_index = 1 if first_car.driver_index == 0 else 0
+            else:
+                # This should never happen, but just in case
+                driver_index = 1
         
         # Create car with team and driver assignment
         cars.append(Car(team_index, driver_index))
+        
+        # Print debug information about driver assignments
+        print(f"Car {i}: Team {team_name}, Driver {Car.DRIVERS[team_name][driver_index]}")
+        
+        # Decrement the count for this team
+        team_counts[team_name] -= 1
 
     clock = pygame.time.Clock()
     renderer.increment_generation()

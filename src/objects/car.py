@@ -62,6 +62,12 @@ class Car:
         self.steering_angle = 0  # Current steering angle
         self.max_steering_angle = 30  # Maximum steering angle in degrees
         self.angular_velocity = 0  # Current turning rate
+        
+        # Add steering oscillation tracking
+        self.last_steering_direction = 0  # 1 for right, -1 for left, 0 for straight
+        self.steering_changes = 0  # Count of direction changes
+        self.last_steering_time = 0  # Time of last steering change
+        self.steering_oscillation_penalty = 0  # Accumulated penalty for oscillations
 
     def draw(self, screen, show_radars=True):
         screen.blit(self.rotated_sprite, self.position)
@@ -122,6 +128,29 @@ class Car:
             self.angular_velocity = (self.speed / turning_radius) if turning_radius != 0 else 0
         else:
             self.angular_velocity = 0
+
+        # Track steering oscillations
+        current_steering_direction = 0
+        if self.steering_angle > 5:  # Significant right turn
+            current_steering_direction = 1
+        elif self.steering_angle < -5:  # Significant left turn
+            current_steering_direction = -1
+            
+        # Detect steering direction changes
+        if current_steering_direction != 0 and current_steering_direction != self.last_steering_direction:
+            # Only count as a change if enough time has passed since the last change
+            if self.time - self.last_steering_time > 10:  # At least 10 frames between changes
+                self.steering_changes += 1
+                self.last_steering_time = self.time
+                
+                # If direction changed rapidly, add to oscillation penalty
+                if self.steering_changes > 3:  # More than 3 changes
+                    self.steering_oscillation_penalty += 1
+            else:
+                # Reset steering changes if too rapid
+                self.steering_changes = 0
+                
+        self.last_steering_direction = current_steering_direction
 
         # Update angle based on angular velocity
         self.angle += math.degrees(self.angular_velocity)
@@ -197,7 +226,11 @@ class Car:
                 position_multiplier = FINISH_POSITION_DECREMENT ** (self.finish_position - 1)
                 completion_reward *= position_multiplier
         
-        return checkpoint_reward + wrong_checkpoint_penalty + distance_reward + time_penalty + completion_reward
+        # Apply steering oscillation penalty
+        # This penalizes rapid back-and-forth steering movements
+        steering_penalty = self.steering_oscillation_penalty * 5  # 5 points per oscillation
+        
+        return checkpoint_reward + wrong_checkpoint_penalty + distance_reward + time_penalty + completion_reward - steering_penalty
 
     def rotate_center(self, image, angle):
         # Rotate The Rectangle
