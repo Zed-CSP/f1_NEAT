@@ -70,7 +70,18 @@ class Car:
         self.steering_oscillation_penalty = 0  # Accumulated penalty for oscillations
 
     def draw(self, screen, show_radars=True):
-        screen.blit(self.rotated_sprite, self.position)
+        # Calculate the position to draw the car
+        # The rotated sprite is now larger, so we need to adjust the position
+        sprite_width, sprite_height = self.rotated_sprite.get_size()
+        draw_position = (
+            self.position[0] - (sprite_width - CAR_SIZE_X) // 2,
+            self.position[1] - (sprite_height - CAR_SIZE_Y) // 2
+        )
+        
+        # Draw the car
+        screen.blit(self.rotated_sprite, draw_position)
+        
+        # Draw radars if requested
         if show_radars:
             self.draw_radar(screen)
 
@@ -172,11 +183,16 @@ class Car:
         self.distance += self.speed
         self.time += 1
         
-        # Calculate New Center
-        self.center = [int(self.position[0]) + CAR_SIZE_X / 2, int(self.position[1]) + CAR_SIZE_Y / 2]
+        # Calculate New Center - use the actual sprite dimensions
+        sprite_width, sprite_height = self.rotated_sprite.get_size()
+        self.center = [
+            int(self.position[0]) + sprite_width // 2, 
+            int(self.position[1]) + sprite_height // 2
+        ]
 
         # Calculate corners and check collision
-        length = 0.5 * CAR_SIZE_X
+        # Use the actual sprite dimensions for collision detection
+        length = 0.5 * max(sprite_width, sprite_height)
         left_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 30))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 30))) * length]
         right_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 150))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 150))) * length]
         left_bottom = [self.center[0] + math.cos(math.radians(360 - (self.angle + 210))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 210))) * length]
@@ -233,13 +249,42 @@ class Car:
         return checkpoint_reward + wrong_checkpoint_penalty + distance_reward + time_penalty + completion_reward - steering_penalty
 
     def rotate_center(self, image, angle):
-        # Rotate The Rectangle
-        rectangle = image.get_rect()
+        """
+        Rotate an image while keeping its center and ensuring the entire image is visible.
+        
+        Args:
+            image: The pygame surface to rotate
+            angle: The angle to rotate by (in degrees)
+            
+        Returns:
+            The rotated image with the car fully visible
+        """
+        # Get the original image dimensions
+        original_width, original_height = image.get_size()
+        
+        # Calculate the diagonal of the original image
+        # This is the maximum size needed for the rotated image
+        diagonal = int(math.sqrt(original_width**2 + original_height**2))
+        
+        # Create a new surface with the diagonal size
+        # This ensures the rotated image has enough space
         rotated_image = pygame.transform.rotate(image, angle)
-        rotated_rectangle = rectangle.copy()
-        rotated_rectangle.center = rotated_image.get_rect().center
-        rotated_image = rotated_image.subsurface(rotated_rectangle).copy()
-        return rotated_image
+        
+        # Get the new dimensions of the rotated image
+        rotated_width, rotated_height = rotated_image.get_size()
+        
+        # Create a new surface with the diagonal size
+        # This ensures the rotated image has enough space
+        new_surface = pygame.Surface((diagonal, diagonal), pygame.SRCALPHA)
+        
+        # Calculate the position to center the rotated image
+        x = (diagonal - rotated_width) // 2
+        y = (diagonal - rotated_height) // 2
+        
+        # Blit the rotated image onto the new surface
+        new_surface.blit(rotated_image, (x, y))
+        
+        return new_surface
 
     def save_radar_state(self):
         """Save the current radar state."""
