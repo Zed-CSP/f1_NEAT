@@ -12,6 +12,7 @@ class SimulationState:
             cls._instance.top_performers = []  # Track top performers from last generation
             cls._instance.team_driver_assignments = {}  # Track which drivers are assigned to which teams
             cls._instance.genome_team_assignments = {}  # Track which genome belongs to which team
+            cls._instance.paused = False  # Track pause state
         return cls._instance
     
     @property
@@ -61,6 +62,14 @@ class SimulationState:
     @genome_team_assignments.setter
     def genome_team_assignments(self, value):
         self._genome_team_assignments = value
+        
+    @property
+    def paused(self):
+        return self._paused
+        
+    @paused.setter
+    def paused(self, value):
+        self._paused = value
         
     def update_top_performers(self, genomes, cars):
         """Update the list of top performers from the current generation"""

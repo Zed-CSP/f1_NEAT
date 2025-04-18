@@ -200,6 +200,33 @@ class Renderer:
         # Draw the background to the screen
         self.screen.blit(driver_bg, (x, y))
 
+    def _draw_pause_indicator(self):
+        """Draw a pause indicator in the center of the screen"""
+        # Create a semi-transparent overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 128))  # Semi-transparent black
+        self.screen.blit(overlay, (0, 0))
+        
+        # Draw "PAUSED" text
+        try:
+            pause_font = pygame.font.Font('./assets/fonts/Alphacorsa.ttf', 100)
+        except:
+            pause_font = pygame.font.SysFont("Arial", 100)
+            
+        pause_text = pause_font.render("PAUSED", True, (255, 255, 255))
+        text_rect = pause_text.get_rect(center=(WIDTH // 2, (HEIGHT // 3)*2))
+        self.screen.blit(pause_text, text_rect)
+        
+        # Draw "Press P to Resume" text
+        try:
+            hint_font = pygame.font.Font('./assets/fonts/Alphacorsa.ttf', 30)
+        except:
+            hint_font = pygame.font.SysFont("Arial", 30)
+            
+        hint_text = hint_font.render("Press P to Resume", True, (200, 200, 200))
+        hint_rect = hint_text.get_rect(center=(WIDTH // 2, (HEIGHT // 3) * 2 + 80))
+        self.screen.blit(hint_text, hint_rect)
+
     def render_frame(self, cars, still_alive, checkpoints, show_radars=True, show_network_vis=False, time_scale=1.0, best_car=None):
         # Clear screen with black
         self.screen.fill((0, 0, 0))
@@ -309,5 +336,9 @@ class Renderer:
                 msg_rect.centerx = WIDTH // 2
                 msg_rect.centery = HEIGHT // 2
                 self.screen.blit(msg_text, msg_rect)
+        
+        # Draw pause indicator if simulation is paused
+        if simulation_state.paused:
+            self._draw_pause_indicator()
         
         pygame.display.flip() 

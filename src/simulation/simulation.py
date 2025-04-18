@@ -154,45 +154,50 @@ def run_simulation(genomes, config, renderer):
                     best_genome = genomes[i][1]
                     best_car = car  # Store the car with the best genome
                 
-                # Car controls - removed time scale from physics
-                if choice == 0:
-                    car.angle += 10
-                elif choice == 1:
-                    car.angle -= 10
-                elif choice == 2:
-                    if(car.speed - 2 >= 12):
-                        car.speed -= 2
-                else:
-                    car.speed += 2
-                
-                # Check for checkpoint collisions and update rewards
-                for cp_index, checkpoint in enumerate(checkpoints):
-                    dx = car.center[0] - checkpoint[0]
-                    dy = car.center[1] - checkpoint[1]
-                    distance = math.sqrt(dx*dx + dy*dy)
+                # Only update car physics if not paused
+                if not input_handler.is_paused():
+                    # Car controls - removed time scale from physics
+                    if choice == 0:
+                        car.angle += 10
+                    elif choice == 1:
+                        car.angle -= 10
+                    elif choice == 2:
+                        if(car.speed - 2 >= 12):
+                            car.speed -= 2
+                    else:
+                        car.speed += 2
                     
-                    # If within checkpoint radius
-                    if distance < checkpoint[2]:
-                        if cp_index == car.current_checkpoint:
-                            # Correct checkpoint
-                            car.current_checkpoint += 1
-                            car.checkpoint_bonus += 1
-                            
-                            # If this was the final checkpoint, record completion time and position
-                            if car.current_checkpoint >= len(checkpoints) and car.completion_time is None:
-                                car.completion_time = car.time
-                                car.finish_position = next_finish_position
-                                finished_cars.append(i)
-                                next_finish_position += 1
+                    # Check for checkpoint collisions and update rewards
+                    for cp_index, checkpoint in enumerate(checkpoints):
+                        dx = car.center[0] - checkpoint[0]
+                        dy = car.center[1] - checkpoint[1]
+                        distance = math.sqrt(dx*dx + dy*dy)
+                        
+                        # If within checkpoint radius
+                        if distance < checkpoint[2]:
+                            if cp_index == car.current_checkpoint:
+                                # Correct checkpoint
+                                car.current_checkpoint += 1
+                                car.checkpoint_bonus += 1
                                 
-                        elif cp_index > car.current_checkpoint:
-                            # Wrong checkpoint - hit one too early
-                            car.wrong_checkpoint_penalty += 1
-                            car.alive = False  # Optional: kill car for hitting wrong checkpoint
-                
-                # Update car and check checkpoints
-                car.update(renderer.game_map)
-                genomes[i][1].fitness += car.get_reward()
+                                # If this was the final checkpoint, record completion time and position
+                                if car.current_checkpoint >= len(checkpoints) and car.completion_time is None:
+                                    car.completion_time = car.time
+                                    car.finish_position = next_finish_position
+                                    finished_cars.append(i)
+                                    next_finish_position += 1
+                                    
+                            elif cp_index > car.current_checkpoint:
+                                # Wrong checkpoint - hit one too early
+                                car.wrong_checkpoint_penalty += 1
+                                car.alive = False  # Optional: kill car for hitting wrong checkpoint
+                    
+                    # Update car and check checkpoints
+                    car.update(renderer.game_map)
+                    genomes[i][1].fitness += car.get_reward()
+                else:
+                    # If paused, still update the car's time to keep it in sync
+                    car.time += 1
 
         # Render the current frame
         renderer.render_frame(cars, still_alive, checkpoints, 

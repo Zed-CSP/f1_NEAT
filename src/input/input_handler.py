@@ -26,6 +26,8 @@ class InputHandler:
             simulation_state.time_scale = min(simulation_state.time_scale + TIME_SCALE_INCREMENT, MAX_TIME_SCALE)
         elif event.key == pygame.K_DOWN:
             simulation_state.time_scale = max(simulation_state.time_scale - TIME_SCALE_INCREMENT, MIN_TIME_SCALE)
+        elif event.key == pygame.K_p:
+            simulation_state.paused = not simulation_state.paused
     
     def should_show_radars(self):
         return simulation_state.show_radars
@@ -34,4 +36,7 @@ class InputHandler:
         return simulation_state.show_network_vis
     
     def get_time_scale(self):
-        return simulation_state.time_scale 
+        return simulation_state.time_scale
+        
+    def is_paused(self):
+        return simulation_state.paused 
