@@ -12,7 +12,8 @@ class SimulationState:
             cls._instance.top_performers = []  # Track top performers from last generation
             cls._instance.team_driver_assignments = {}  # Track which drivers are assigned to which teams
             cls._instance.genome_team_assignments = {}  # Track which genome belongs to which team
-            cls._instance.paused = False  # Track pause state
+            cls._instance.paused = True  # Start in paused state
+            cls._instance.selected_performer_index = None  # Track which performer is selected (0, 1, or 2)
         return cls._instance
     
     @property
@@ -38,6 +39,9 @@ class SimulationState:
     @show_network_vis.setter
     def show_network_vis(self, value):
         self._show_network_vis = value
+        # Reset selected performer when toggling network visualization
+        if not value:
+            self._selected_performer_index = None
         
     @property
     def top_performers(self):
@@ -70,6 +74,14 @@ class SimulationState:
     @paused.setter
     def paused(self, value):
         self._paused = value
+        
+    @property
+    def selected_performer_index(self):
+        return self._selected_performer_index
+        
+    @selected_performer_index.setter
+    def selected_performer_index(self, value):
+        self._selected_performer_index = value
         
     def update_top_performers(self, genomes, cars):
         """Update the list of top performers from the current generation"""

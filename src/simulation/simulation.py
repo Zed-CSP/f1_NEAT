@@ -195,9 +195,6 @@ def run_simulation(genomes, config, renderer):
                     # Update car and check checkpoints
                     car.update(renderer.game_map)
                     genomes[i][1].fitness += car.get_reward()
-                else:
-                    # If paused, still update the car's time to keep it in sync
-                    car.time += 1
 
         # Render the current frame
         renderer.render_frame(cars, still_alive, checkpoints, 
@@ -214,7 +211,10 @@ def run_simulation(genomes, config, renderer):
             simulation_state.update_top_performers(genomes, cars)
             break
 
-        counter += 1
+        # Only increment counter if not paused
+        if not input_handler.is_paused():
+            counter += 1
+            
         if counter == SIMULATION_TIMEOUT:
             # Update the best genome at the end of the generation
             if best_genome:

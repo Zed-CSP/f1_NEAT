@@ -26,8 +26,17 @@ class InputHandler:
             simulation_state.time_scale = min(simulation_state.time_scale + TIME_SCALE_INCREMENT, MAX_TIME_SCALE)
         elif event.key == pygame.K_DOWN:
             simulation_state.time_scale = max(simulation_state.time_scale - TIME_SCALE_INCREMENT, MIN_TIME_SCALE)
-        elif event.key == pygame.K_p:
+        elif event.key == pygame.K_SPACE:
             simulation_state.paused = not simulation_state.paused
+        elif event.key == pygame.K_1 and simulation_state.show_network_vis:
+            simulation_state.selected_performer_index = 0
+            simulation_state.paused = True
+        elif event.key == pygame.K_2 and simulation_state.show_network_vis:
+            simulation_state.selected_performer_index = 1
+            simulation_state.paused = True
+        elif event.key == pygame.K_3 and simulation_state.show_network_vis:
+            simulation_state.selected_performer_index = 2
+            simulation_state.paused = True
     
     def should_show_radars(self):
         return simulation_state.show_radars
@@ -39,4 +48,7 @@ class InputHandler:
         return simulation_state.time_scale
         
     def is_paused(self):
-        return simulation_state.paused 
+        return simulation_state.paused
+        
+    def get_selected_performer_index(self):
+        return simulation_state.selected_performer_index 
